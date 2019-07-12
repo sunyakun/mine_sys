@@ -1,0 +1,35 @@
+{% extends 'frame.html' %}
+
+{% block frame_body %}
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="p-5">
+        <div class="text-center">
+          <h1 class="h4 text-gray-900 mb-4">Profile</h1>
+        </div>
+
+        <form class="user" method="post" action="{% url 'super_dash:update_profile' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <img class="col-12 p-5" src="{{ photo_url }}">
+          <div class="form-group">
+            <input type="file" id="inputFile" name="photo">
+            <p>上传头像</p>
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-control form-control-user" id="inputUsername" value="{{ username }}" name="username">
+          </div>
+          <div class="form-group">
+            <input readonly type="email" class="form-control form-control-user" id="inputEmail" aria-describedby="emailHelp" value="{{ email }}" name="email">
+          </div>
+          <div class="form-group">
+            <input type="password" class="form-control form-control-user" id="inputPassword" placeholder="******" name="password">
+          </div>
+          <input class="btn btn-primary btn-user btn-block" type="submit" value="Submit">
+        </form>
+        {% if error %}
+          <p class="text-center" style="color: red;">update profile fail!</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

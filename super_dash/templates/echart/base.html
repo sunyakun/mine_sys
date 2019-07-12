@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}模板{% endblock %}</title>
+</head>
+<body style="height:100vh;margin:0;">
+  {% block body %}{% endblock %}
+</body>
+<script src="/static/vendor/jquery/jquery.min.js"></script>
+<script lang="javascript" src="/static/js/echarts/echarts.min.js"></script>
+<script lang="javascript" src="/static/js/echarts/echarts-gl.min.js"></script>
+<script lang="javascript" src="/static/js/echarts/vintage.js"></script>
+{% block script %}{% endblock %}
+</html>

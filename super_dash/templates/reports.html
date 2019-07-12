@@ -1,0 +1,131 @@
+{% extends 'frame.html' %}
+
+{% block frame_body %}
+  <h3 style="display:none" id="error">配置信息可能有误，导致数据分析失败！</h3>
+  <div class="row">
+    <div class="col-3">
+      <a class="dropdown-toggle" href="#" id="datasetDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="text-decoration: none;">
+        <span class="mr-2 d-none d-lg-inline text-gray-600">选择数据集</span>
+      </a>
+      <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="datasetDropdown">
+        {% for dataset in datasets %}
+          <a class="dropdown-item p-2" href="#" onclick="showChart(event)">{{ dataset.name }}</a>
+          <div class="dropdown-divider"></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div id="dataset_report" style="display:none;">
+    <div id="dataset_overview"></div>
+
+    <div class="row">
+      <div class="col-6 p-1">
+        <div class="row" id="gridDropdown">
+          <div class="col-3">
+            <a class="dropdown-toggle" href="#" id="gridDropdownItems" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="text-decoration: none;">
+              <span class="mr-2 d-none d-lg-inline text-gray-600">index</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="gridDropDownItems" id="index"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-6">
+        <iframe id="frame-1" style="display:none;"></iframe>
+      </div>
+
+      <div class="col-6">
+        <iframe id="frame-2" style="display:none;"></iframe>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-6">
+        <iframe id="frame-3"  style="display:none;"></iframe>
+      </div>
+
+      <div class="col-6">
+        <iframe id="frame-4"  style="display:none;"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <div class="row p-3" style="display:none" id="upload_predict_file">
+    <div class="col-3" style="margin:auto">
+      <form method="post" action="{% url "super_dash:predict" %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="text" id="predict_dataset" style="display:none" name="dataset_name"/>
+        <input type="file" name="dataset"/>
+        <input type="submit" class="btn btn-primary btn-block" value="上传"/>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script src="/static/vendor/jquery/jquery.min.js"></script>
+  <script lang="javascript" src="/static/js/echarts/echarts.min.js"></script>
+  <script lang="javascript" src="/static/js/echarts/echarts-gl.min.js"></script>
+  <script lang="javascript" src="/static/js/echarts/vintage.js"></script>
+  <script lang="javascript">
+    let echart_base_url = "{% url 'super_dash:echart' %}";
+    let echart_type = [];
+    let dataset = null;
+
+    function showChart(event) {
+      document.getElementById("dataset_report").style = 'display: block;';
+      dataset = event.target.innerText;
+
+      document.getElementById("upload_predict_file").setAttribute("style", "display:block");
+      document.getElementById("predict_dataset").setAttribute("value", dataset);
+
+      let dataset_overview = document.getElementById("dataset_overview");
+      $.get('{% url "super_dash:get_dataset_overview" %}', {dataset: dataset}, function(data){
+        dataset_overview.innerHTML = data;
+      });
+
+      $.get('{% url "super_dash:get_dataset_index" %}', {dataset: dataset}, function(data){
+        let index_ele = document.getElementById("index");
+        index_ele.innerText = "";
+        for(let i of JSON.parse(data).index){
+          let a = document.createElement('a');
+          a.setAttribute('class', 'dropdown-item p-2');
+          a.setAttribute('onclick', 'onChangeIndex(event)');
+          a.innerText = i;
+          index_ele.append(a);
+          let div_ele = document.createElement('a');
+          div_ele.setAttribute('class', 'dropdown-divider');
+          index_ele.append(div_ele);
+        }
+      });
+
+      $.get('{% url "super_dash:get_dataset_config" %}', {dataset: dataset}, function(data){
+        let config = JSON.parse(data);
+        if(config.chart){
+          echart_type = config.chart.splice(0, 4);
+        }
+
+        let frames = document.getElementsByTagName('iframe');
+        for(let f of frames){
+          f.setAttribute("style", "display:none");
+        }
+
+        for(let i=0; i<echart_type.length; i++){
+          let frame = document.getElementById('frame-'+(i+1));
+          frame.setAttribute('src', echart_base_url+'?dataset='+dataset+'&echart_type='+echart_type[i]);
+          frame.setAttribute('style', 'width:100%;height:500px;display: block');
+        }
+      });
+    }
+
+    function onChangeIndex(event){
+      let index = event.target.innerText;
+      for(let i=0; i<echart_type.length; i++){
+        let frame = document.getElementById('frame-'+(i+1));
+        frame.setAttribute('src', echart_base_url+'?dataset='+dataset+'&echart_type='+echart_type[i]+'&index='+index);
+      }
+    }
+  </script>
+{% endblock %}

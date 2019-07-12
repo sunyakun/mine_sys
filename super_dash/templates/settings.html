@@ -1,0 +1,78 @@
+{% extends 'frame.html' %}
+
+{% block frame_body %}
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-5" style="margin:auto;">
+        <form class="form-horizontal" action="{% url 'super_dash:update_settings' %}" method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="control-label">数据集</label>
+            <div>
+              <select class="form-control form-control-static" name="name" onchange="flush_form(event)" id="selectControler">
+                {% for dataset in datasets %}
+                  <option>{{ dataset.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label">算法插件</label>
+            <div>
+              <input type="text" name="algorithm" class="form-control form-control-static" id="algorithm">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label">配置信息</label>
+            <div>
+              <textarea class="form-control form-control-static" name="config" rows="5" id="config"></textarea>
+            </div>
+          </div>
+          <input type="submit" class="btn btn-primary btn-block" value="保存">
+          {% if error %}
+            <p style="color:red;">{{ error }}</p>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <link rel="stylesheet" href="/static/css/codemirror.css">
+  <script lang="javascript" src="/static/js/codemirror/codemirror.js"></script>
+  <script lang="javascript" src="/static/js/codemirror/javascript.js"></script>
+  <script lang="javascript">
+    let data = {};
+    {% for i in datasets %}
+      {% autoescape off %}
+      data["{{ i.name }}"] = {};
+      data["{{ i.name }}"].algorithm = '{{ i.algorithm }}';
+      {% endautoescape %}
+    {% endfor %}
+
+    let name = $('#selectControler')[0].value;
+    $('#algorithm')[0].value = data[name].algorithm;
+
+    //codemirror
+    let code_mirror = CodeMirror.fromTextArea($('#config')[0], {
+      lineNumbers: true,
+      mode: "javascript"
+    });
+    code_mirror.on('change', function(ins){
+      $('#config')[0].value = ins.getValue();
+    });
+
+    $.get('{% url 'super_dash:get_dataset_config' %}', {dataset: name}, function(data){
+      code_mirror.setValue(data);
+    });
+
+    function flush_form(event){
+      let control = event.target;
+      $('#algorithm')[0].value = data[control.value].algorithm;
+      $.get('{% url 'super_dash:get_dataset_config' %}', {dataset: control.value}, function(data){
+        code_mirror.setValue(data);
+      });
+    }
+  </script>
+{% endblock %}

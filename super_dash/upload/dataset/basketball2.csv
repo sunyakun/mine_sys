@@ -1,0 +1,83 @@
+opponent,point,opp_point,win
+Golden State Warriors,100,108,False
+Los Angeles Clippers,92,108,False
+Sacramento Kings,120,131,False
+Boston Celtics,95,101,False
+Phoenix Suns,117,110,True
+Los Angeles Clippers,128,110,True
+Charlotte Hornets,111,107,True
+Washington Wizards,134,111,True
+New Orleans Pelicans,122,116,True
+Cleveland Cavaliers,95,86,True
+Houston Rockets,98,80,True
+Dallas Mavericks,96,111,False
+Phoenix Suns,118,101,True
+New York Knicks,128,103,True
+Phoenix Suns,110,100,True
+Sacramento Kings,113,117,False
+Golden State Warriors,123,95,True
+Charlotte Hornets,109,104,True
+Denver Nuggets,98,105,False
+Cleveland Cavaliers,100,83,True
+Atlanta Hawks,124,109,True
+Detroit Pistons,110,83,True
+Brooklyn Nets,114,112,True
+Chicago Bulls,112,114,False
+Utah Jazz,122,113,True
+New Orleans Pelicans,114,118,False
+Denver Nuggets,98,109,False
+Los Angeles Clippers,110,104,True
+Chicago Bulls,121,96,True
+Sacramento Kings,132,113,True
+Utah Jazz,107,106,True
+Minnesota Timberwolves,112,114,False
+Houston Rockets,109,113,False
+Phoenix Suns,118,102,True
+Dallas Mavericks,103,105,False
+Dallas Mavericks,122,102,True
+Los Angeles Lakers,107,100,True
+Portland Trail Blazers,111,109,True
+Washington Wizards,98,116,False
+Minnesota Timberwolves,117,119,False
+San Antonio Spurs,147,154,False
+San Antonio Spurs,122,112,True
+Atlanta Hawks,126,142,False
+Los Angeles Lakers,128,138,False
+Philadelphia 76ers,117,115,True
+New York Knicks,127,109,True
+Portland Trail Blazers,123,114,True
+New Orleans Pelicans,122,116,True
+Milwaukee Bucks,118,112,True
+Orlando Magic,126,117,True
+Miami Heat,118,102,True
+Boston Celtics,129,134,False
+Orlando Magic,132,122,True
+Memphis Grizzlies,117,95,True
+Houston Rockets,117,112,True
+Portland Trail Blazers,120,111,True
+New Orleans Pelicans,122,131,False
+Utah Jazz,148,147,True
+Sacramento Kings,116,119,False
+Denver Nuggets,112,121,False
+Philadelphia 76ers,104,108,False
+San Antonio Spurs,102,116,False
+Memphis Grizzlies,99,95,True
+Minnesota Timberwolves,120,131,False
+Portland Trail Blazers,129,121,True
+Los Angeles Clippers,110,118,False
+Utah Jazz,98,89,True
+Brooklyn Nets,108,96,True
+Indiana Pacers,106,108,False
+Golden State Warriors,88,110,False
+Miami Heat,107,116,False
+Toronto Raptors,114,123,False
+Toronto Raptors,116,109,True
+Memphis Grizzlies,103,115,False
+Indiana Pacers,107,99,True
+Denver Nuggets,105,115,False
+Dallas Mavericks,103,106,False
+Los Angeles Lakers,119,103,True
+Detroit Pistons,123,110,True
+Minnesota Timberwolves,132,126,True
+Houston Rockets,112,111,True
+Milwaukee Bucks,127,116,True

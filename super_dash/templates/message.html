@@ -1,0 +1,44 @@
+{% extends 'frame.html' %}
+
+{% block frame_body %}
+  <!-- alters -->
+  <div class="row">
+      {% for date, msg in alters %}
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">{{ date }}</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ msg }}</div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+  </div>
+  <!-- end alters -->
+
+  <hr class="sidebar-divider d-none d-md-block">
+
+  <!-- messages -->
+  <div class="row">
+      {% for date, msg, snd_photo in messages %}
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">{{ date }}</h6>
+            </div>
+            <div class="card-body">
+              {{ msg }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+  </div>
+  <!-- end messages -->
+{% endblock %}

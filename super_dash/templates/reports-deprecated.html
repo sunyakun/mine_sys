@@ -1,0 +1,225 @@
+{% extends 'frame.html' %}
+
+{% block frame_body %}
+  <h3 style="display:none" id="error">配置信息可能有误，导致数据分析失败！</h3>
+  <div class="row">
+    <div class="col-3">
+      <a class="dropdown-toggle" href="#" id="datasetDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="text-decoration: none;">
+        <span class="mr-2 d-none d-lg-inline text-gray-600">选择数据集</span>
+      </a>
+      <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="datasetDropdown">
+        {% for dataset in datasets %}
+          <a class="dropdown-item p-2" href="#" onclick="showChart(event)">{{ dataset.name }}</a>
+          <div class="dropdown-divider"></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div id="dataset_overview"></div>
+
+  <div class="row">
+    <div class="col-6 p-1">
+      <div class="row">
+        <a class="btn btn-primary" style="display:none" id="treeBtn">新窗口查看</a>
+      </div>
+      <div id="tree-echart" style="height:400px;margin:auto;"></div>
+    </div>
+
+    <div class="col-6 p-1">
+      <div class="row" style="display: none" id="gridDropdown">
+        <div class="col-3">
+          <a class="dropdown-toggle" href="#" id="gridDropdownItems" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="text-decoration: none;">
+            <span class="mr-2 d-none d-lg-inline text-gray-600">index</span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="gridDropDownItems"></div>
+        </div>
+      </div>
+      <div id="grid-echart" style="height:400px;margin:auto;"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-6 p-1">
+      <div class="row" style="display: none" id="pieDropdown">
+        <div class="col-3">
+          <a class="dropdown-toggle" href="#" id="pieDropdownItems" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="text-decoration: none;">
+            <span class="mr-2 d-none d-lg-inline text-gray-600">index</span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="pieDropDownItems"></div>
+        </div>
+      </div>
+      <div id="pie-echart" style="height:400px;margin:auto;"></div>
+    </div>
+  </div>
+
+  <div class="row">
+
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script lang="javascript" src="/static/js/echarts/echarts.min.js"></script>
+  <script lang="javascript" src="/static/js/echarts/echarts-gl.min.js"></script>
+  <script lang="javascript" src="/static/js/echarts/vintage.js"></script>
+  <script lang="javascript">
+    let grid_echart = echarts.init(document.getElementById('grid-echart'), 'vintage');
+    let pie_echart = echarts.init(document.getElementById('pie-echart'), 'vintage');
+    let tree_echart = echarts.init(document.getElementById('tree-echart'), 'vintage');
+    let echart_data = null;
+
+    function showChart(event) {
+
+      grid_echart.showLoading();
+      pie_echart.showLoading();
+      tree_echart.showLoading();
+
+      <!-- show example -->
+      grid_echart.setOption({
+        grid3D: {},
+        xAxis3D: {type: 'category', gridIndex: 0},
+        yAxis3D: {type: 'category', gridIndex: 1},
+        zAxis3D: {type: 'value'},
+        virtualMap: {
+          dimension: 'number'
+        },
+        dataset: {
+          source: []
+        },
+        series: [
+          {
+            type: 'bar3D',
+            encode: {
+              x: 'sex',
+              y: 'height',
+              z: 'number'
+            }
+          }
+        ]
+      });
+      pie_echart.setOption({
+        title: {
+          text: '频次饼状图'
+        },
+        dataset: {
+          source: []
+        },
+        series: [
+          {
+            type: 'pie',
+            roseType: 'radius'
+          },
+        ]
+      });
+      tree_echart.setOption({
+        title: {
+          text: "决策树"
+        },
+        series: [
+          {
+            type: 'tree',
+            initialTreeDepth: -1,
+            label: {
+              normal: {
+                position: 'left',
+                verticalAlign: 'middle',
+                align: 'right',
+                fontSize: 8
+              }
+            },
+            leaves: {
+              label: {
+                normal: {
+                  position: 'right',
+                  verticalAlign: 'middle',
+                  align: 'left'
+                }
+              }
+            }
+          }
+        ]
+      });
+      <!-- end -->
+
+      dataset = event.target.innerHTML;
+
+      let overview_table = document.getElementById('dataset_overview');
+      overview_table.innerHTML = "";
+      $.get("{% url 'super_dash:get_dataset_overview' %}?dataset="+dataset, function(data){
+        overview_table.innerHTML = data;
+      });
+      $.get("{% url 'super_dash:get_dataset' %}?dataset="+dataset, function(data){
+        echart_data = JSON.parse(data);
+        document.getElementById('error').setAttribute("style", "display:none; color:red");
+        if(echart_data.error) {
+          document.getElementById('error').setAttribute("style", "display:block; color:red");
+          console.log(echart_data.exception_stack);
+        }
+
+        tree_echart.setOption({series: [{data: [echart_data.decision_tree]}]});
+        tree_echart.hideLoading();
+
+        grid_echart.setOption({dataset: {source: echart_data.threeD_histogram[0].data}});
+        grid_echart.hideLoading();
+
+        pie_echart.setOption({dataset: {source: echart_data.pie_graphs[0].data}});
+        pie_echart.hideLoading();
+        let itemIter = function*(){
+          for (let pie of echart_data.pie_graphs) {
+            yield pie.name
+          }
+        };
+        setupDropdown('pieDropdown', itemIter(), "pieGraphSelect(event)");
+        setupDropdown('gridDropdown', itemIter(), "gridSelect(event)");
+
+        let treeBtn = document.getElementById('treeBtn');
+        treeBtn.setAttribute("style", "display:block");
+        treeBtn.setAttribute("href", "{% url 'super_dash:echart' %}?dataset="+dataset+"&echart_type=pie&index=Weather")
+      });
+    }
+
+    function setupDropdown(id, items, fn){
+      let dropdown = document.getElementById(id);
+      dropdown.setAttribute('style', 'display:block;');
+      let dropdownItems = dropdown.querySelector('#'+id+' > div > div');
+      for(let item of items) {
+        let a = document.createElement('a');
+        a.setAttribute("class", "dropdown-item p-2");
+        a.setAttribute('onclick', fn);
+        a.innerText = item;
+        let divEle = document.createElement('div');
+        divEle.setAttribute('class', 'dropdown-divider');
+        dropdownItems.append(a);
+        dropdownItems.append(divEle);
+      }
+    }
+
+    function pieGraphSelect(event){
+      let name = event.target.innerText;
+      for(let pie of echart_data.pie_graphs){
+        if(pie.name === name){
+          pie_echart.setOption({
+            title: {
+              text: name
+            },
+            dataset: {source: pie.data}
+          })
+        }
+      }
+    }
+
+    function gridSelect(event){
+      let name = event.target.innerText;
+      for(let grid of echart_data.threeD_histogram){
+        if(grid.name === name){
+          grid_echart.setOption({
+            title: {
+              text: name
+            },
+            dataset: {source: grid.data}
+          })
+        }
+      }
+    }
+  </script>
+{% endblock %}

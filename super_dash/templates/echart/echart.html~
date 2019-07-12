@@ -1,0 +1,32 @@
+{% extends 'echart/base.html' %}
+
+{% block title %}Decision Tree{% endblock %}
+
+{% block body %}
+  <div style="display:none;color:red;" id="exception_stack">
+    <p>ERROR!</p>
+    <p></p>
+  </div>
+  <div id="echart" style="width:100%;height:100%"></div>
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+  <script language="JavaScript">
+    u    {% autoescape off %}
+    echart.setOption({{ echart_config }});
+    {% endautoescape %}
+    echart.showLoading();
+    $.get("{% url 'super_dash:get_dataset' %}?dataset={{ dataset }}&echart_type={{ echart_type }}&index={{ index }}", function(data) {
+      echart_data = JSON.parse(data);
+      if(echart_data.error){
+        let estk_ele = document.getElementById('exception_stack');
+        estk_ele.style = "display: block;color:red;";
+        estk_ele.querySelector("p:nth-child(2)").innerText = echart_data.exception;
+        document.getElementById('echart').style = 'display:none';
+      }
+      echart.setOption({series: {data: echart_data}});
+      echart.hideLoading();
+    });
+  </script>
+{% endblock %}

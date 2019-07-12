@@ -1,0 +1,11 @@
+# python cache files
+__pycache__
+**/__pycache__
+
+# pycharm
+.idea
+**/.idea
+
+# vscode
+.vscode
+**/.vscode

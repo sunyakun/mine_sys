@@ -1,0 +1,122 @@
+{% extends 'frame.html' %}
+
+{% block frame_body %}
+  <h3 style="display:none" id="error">配置信息可能有误，导致数据分析失败！</h3>
+  <div class="row">
+    <div class="col-3">
+      <a class="dropdown-toggle" href="#" id="datasetDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="text-decoration: none;">
+        <span class="mr-2 d-none d-lg-inline text-gray-600">选择数据集</span>
+      </a>
+      <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="datasetDropdown">
+        {% for dataset in datasets %}
+          <a class="dropdown-item p-2" href="#" onclick="showChart(event)">{{ dataset.name }}</a>
+          <div class="dropdown-divider"></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div id="dataset_report" style="display:none;">
+    <div id="dataset_overview"></div>
+
+    <div class="row">
+      <div class="col-6 p-1">
+        <div class="row" id="gridDropdown">
+          <div class="col-3">
+            <a class="dropdown-toggle" href="#" id="gridDropdownItems" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="text-decoration: none;">
+              <span class="mr-2 d-none d-lg-inline text-gray-600">index</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="gridDropDownItems" id="index"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="echart_scatter" style="height:300px;width:300px;"></div>
+
+    <div class="row">
+      <div class="col-6">
+        <iframe id="frame-1"></iframe>
+      </div>
+
+      <div class="col-6">
+        <iframe id="frame-2"></iframe>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-6">
+        <iframe id="frame-3"></iframe>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script src="/static/vendor/jquery/jquery.min.js"></script>
+  <script lang="javascript" src="/static/js/echarts/echarts.min.js"></script>
+  <script lang="javascript" src="/static/js/echarts/echarts-gl.min.js"></script>
+  <script lang="javascript" src="/static/js/echarts/vintage.js"></script>
+  <script lang="javascript">
+    let echart_base_url = "{% url 'super_dash:echart' %}";
+    let echart_type = ["tree", "pie", "histogram"];
+    let dataset = null;
+
+    function showChart(event) {
+      document.getElementById("dataset_report").style = 'display: block;';
+      dataset = event.target.innerText;
+
+      let dataset_overview = document.getElementById("dataset_overview");
+      $.get('{% url "super_dash:get_dataset_overview" %}', {dataset: dataset}, function(data){
+        dataset_overview.innerHTML = data;
+      });
+
+      $.get('{% url "super_dash:get_dataset_index" %}', {dataset: dataset}, function(data){
+        let index_ele = document.getElementById("index");
+        index_ele.innerText = "";
+        for(let i of JSON.parse(data).index){
+          let a = document.createElement('a');
+          a.setAttribute('class', 'dropdown-item p-2');
+          a.setAttribute('onclick', 'onChangeIndex(event)');
+          a.innerText = i;
+          index_ele.append(a);
+          let div_ele = document.createElement('a');
+          div_ele.setAttribute('class', 'dropdown-divider');
+          index_ele.append(div_ele);
+        }
+      });
+
+      for(let i=0; i<echart_type.length; i++){
+        let frame = document.getElementById('frame-'+(i+1));
+        frame.setAttribute('src', echart_base_url+'?dataset='+dataset+'&echart_type='+echart_type[i]);
+        frame.setAttribute('style', 'width:100%;height:500px;');
+      }
+    }
+
+    function onChangeIndex(event){
+      let index = event.target.innerText;
+      for(let i=0; i<echart_type.length; i++){
+        let frame = document.getElementById('frame-'+(i+1));
+        frame.setAttribute('src', echart_base_url+'?dataset='+dataset+'&echart_type='+echart_type[i]+'&index='+index);
+      }
+    }
+    
+		let echart = echarts.init(document.getElementById('echart_scatter'), 'vintage');
+		echart.setOption({
+	  	xAxis: {
+				type: 'value'
+			},
+			yAxis: {
+				type: 'value'
+			},
+			series: [{
+				type: 'scatter',
+				data: [
+					[10,10],
+					[10,11],
+					[10,12]
+				]
+			}]
+		});
+  </script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "echart/echart.html" %}
+
+{% block script %}
+  <script lang="javascript">
+    let echart = echarts.init(document.getElementById('echart'), 'vintage');
+    {% autoescape off %}
+      echart.setOption({{ echart_config }});
+    {% endautoescape %}
+    echart.showLoading();
+    $.get("{% url 'super_dash:get_dataset' %}", {
+      dataset: "{{ dataset }}",
+      echart_type: "scatter"
+    }, function(data) {
+      echart_datas = JSON.parse(data);
+      if(echart_datas.error){
+        let estk_ele = document.getElementById('exception_stack');
+        estk_ele.style = "display: block;color:red;";
+        estk_ele.querySelector("p:nth-child(2)").innerText = echart_data.exception;
+        document.getElementById('echart').style = 'display:none';
+        return;
+      }
+      let series = [];
+      for(let data of echart_datas){
+        let color = Math.random()*255;
+        series.push({
+          type: "scatter",
+          data: data.data,
+          itemStyle: {
+            normal: {
+              color: 'rgb(120, 30, ' + color.toFixed(0) + ')'
+            }
+          }
+        })
+      }
+      echart.setOption({series: series});
+      echart.hideLoading();
+    });
+  </script>
+{% endblock %}
